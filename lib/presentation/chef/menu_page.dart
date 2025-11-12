@@ -58,6 +58,12 @@ class _MenuPageState extends State<MenuPage> {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No menu items found. Please add some in Manager Page.'));
           }
+  Text(
+      'Total Menu Items: ${snapshot.data!.docs.length}',
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      );,
+        const SizedBox(height: 8),
+      
 
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,
