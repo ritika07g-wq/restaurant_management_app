@@ -23,8 +23,8 @@ class _ScreenloginState extends State<Screenlogin> {
 
  void _handleLogin() async {
   final email = _usernameController.text.trim(); // now used as email
-  final password = _passwordController.text.trim();
-
+  final password = _passwordController.text.trim(); // now used as password
+  //first change made
   if (_formKey.currentState!.validate()) {
     try {
       // 🔐 Sign in using Firebase Auth
