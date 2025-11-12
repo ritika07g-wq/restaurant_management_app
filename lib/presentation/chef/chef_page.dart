@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Cloud Firestore
 
 // Assuming MenuPage exists and is where the chef can view the restaurant's menu
 import 'menu_page.dart'; // Keep this import as per user's original code
+//1st change
 
 class ChefPage extends StatefulWidget {
   // Assuming chefName and chefRole might be passed from login, similar to StaffPage
