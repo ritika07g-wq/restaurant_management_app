@@ -255,6 +255,13 @@ class _ChefPageState extends State<ChefPage> {
             icon: const Icon(Icons.menu_book_outlined),
             onPressed: _goToMenuPage,
           ),
+          IconButton(
+            tooltip: 'Refresh Orders',
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+            setState(() {}); // Forces UI refresh (Firestore stream auto-updates, but good for manual reload)
+              },
+          ),
           PopupMenuButton<String>(
             onSelected: (value) {
               if (value == 'settings') {
