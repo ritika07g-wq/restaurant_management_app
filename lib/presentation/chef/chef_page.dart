@@ -68,6 +68,8 @@ class _ChefPageState extends State<ChefPage> {
     try {
       await _firestore.collection('orders').doc(orderDocId).update({
         'status': newStatus,
+        'updatedAt': FieldValue.serverTimestamp(), // 🔹 add timestamp field
+
       });
       _showSnackBar('Order status updated to $newStatus');
     } catch (e) {
