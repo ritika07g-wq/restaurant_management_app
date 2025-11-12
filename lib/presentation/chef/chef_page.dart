@@ -244,9 +244,10 @@ class _ChefPageState extends State<ChefPage> {
       backgroundColor: const Color.fromARGB(255, 228, 228, 222),
       appBar: AppBar(
         title: Text(
-          "Chef: ${widget.chefName ?? 'Chef'}", // Use widget.chefName
+          "Chef: ${widget.chefName ?? 'Chef'} (${widget.chefRole ?? 'Role Unknown'})",
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
@@ -304,7 +305,7 @@ class _ChefPageState extends State<ChefPage> {
             const SizedBox(height: 12),
 
             // 🆕 Order Cards Layout - Now using StreamBuilder
-            Expanded(
+            Expanded( 
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore.collection('orders')
                     .where('status', whereIn: ['Pending', 'Preparing', 'Ready']) // Chef sees these statuses
