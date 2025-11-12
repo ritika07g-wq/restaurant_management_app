@@ -7,6 +7,7 @@ import 'package:cloud_firestore/cloud_firestore.dart'; // Cloud Firestore
 
 // Assuming MenuPage exists and is where the chef can view the restaurant's menu
 import 'menu_page.dart'; // Keep this import as per user's original code
+//1st change
 
 class ChefPage extends StatefulWidget {
   // Assuming chefName and chefRole might be passed from login, similar to StaffPage
@@ -67,6 +68,8 @@ class _ChefPageState extends State<ChefPage> {
     try {
       await _firestore.collection('orders').doc(orderDocId).update({
         'status': newStatus,
+        'updatedAt': FieldValue.serverTimestamp(), // 🔹 add timestamp field
+
       });
       _showSnackBar('Order status updated to $newStatus');
     } catch (e) {
@@ -243,15 +246,23 @@ class _ChefPageState extends State<ChefPage> {
       backgroundColor: const Color.fromARGB(255, 228, 228, 222),
       appBar: AppBar(
         title: Text(
-          "Chef: ${widget.chefName ?? 'Chef'}", // Use widget.chefName
+          "Chef: ${widget.chefName ?? 'Chef'} (${widget.chefRole ?? 'Role Unknown'})",
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+
         backgroundColor: Colors.blueAccent,
         actions: [
           IconButton(
             tooltip: 'Menu',
             icon: const Icon(Icons.menu_book_outlined),
             onPressed: _goToMenuPage,
+          ),
+          IconButton(
+            tooltip: 'Refresh Orders',
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+            setState(() {}); // Forces UI refresh (Firestore stream auto-updates, but good for manual reload)
+              },
           ),
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -303,7 +314,7 @@ class _ChefPageState extends State<ChefPage> {
             const SizedBox(height: 12),
 
             // 🆕 Order Cards Layout - Now using StreamBuilder
-            Expanded(
+            Expanded( 
               child: StreamBuilder<QuerySnapshot>(
                 stream: _firestore.collection('orders')
                     .where('status', whereIn: ['Pending', 'Preparing', 'Ready']) // Chef sees these statuses
