@@ -153,7 +153,9 @@ class _StaffPageState extends State<StaffPage> {
                 final itemData = document.data()! as Map<String, dynamic>;
                 final itemId = document.id;
                 final itemName = itemData['name'] ?? 'Unknown Item';
-                final itemPrice = (itemData['price'] ?? 0.0).toDouble();
+                final rawPrice = itemData['price'];
+                final itemPrice = rawPrice == null ? 0.0 : (rawPrice is int ? rawPrice.toDouble() : (rawPrice as num).toDouble());
+//THIRD CHANGE
 
                 return FilterChip(
                   label: Text('$itemName (\$${itemPrice.toStringAsFixed(2)})'),
