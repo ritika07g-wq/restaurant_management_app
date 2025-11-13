@@ -27,6 +27,15 @@ class _StaffPageState extends State<StaffPage> {
 
   final TextEditingController _gstController = TextEditingController();
   final TextEditingController _discountController = TextEditingController();
+  
+  @override
+
+  void dispose() {
+  _gstController.dispose();
+  _discountController.dispose();
+  super.dispose();
+  }
+
 
   // Logout
   void _logout() async {
