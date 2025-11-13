@@ -159,17 +159,23 @@ class _StaffPageState extends State<StaffPage> {
                   label: Text('$itemName (\$${itemPrice.toStringAsFixed(2)})'),
                   selected: _selectedItemsWithDetails.containsKey(itemId),
                   onSelected: (bool selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedItemsWithDetails[itemId] = {
-                          ...itemData,
-                          'quantity': 1
-                        };
-                      } else {
-                        _selectedItemsWithDetails.remove(itemId);
-                      }
-                    });
-                  },
+                  setState(() {
+                  if (selected) {
+                  if (_selectedItemsWithDetails.containsKey(itemId)) {
+                  _selectedItemsWithDetails[itemId]!['quantity'] =
+                  (_selectedItemsWithDetails[itemId]!['quantity'] ?? 1) + 1;
+                 }  else {
+          _selectedItemsWithDetails[itemId] = {
+            ...itemData,
+            'quantity': 1
+            };
+        }
+                } else {
+                _selectedItemsWithDetails.remove(itemId);
+               }
+              });
+              },
+
                 );
               }).toList(),
             );
