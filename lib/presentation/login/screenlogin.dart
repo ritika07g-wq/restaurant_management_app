@@ -15,87 +15,98 @@ class Screenlogin extends StatefulWidget {
 }
 
 class _ScreenloginState extends State<Screenlogin> {
+  // Controllers for input fields
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  // Form key for validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   String? _errorMessage;
 
- void _handleLogin() async {
-  final email = _usernameController.text.trim(); // now used as email
-  final password = _passwordController.text.trim();
+  // ------------------ LOGIN FUNCTION ----------------
+  void _handleLogin() async {
+    final email = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
 
-  if (_formKey.currentState!.validate()) {
-    try {
-      // 🔐 Sign in using Firebase Auth
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
+    if (_formKey.currentState!.validate()) {
+      try {
+        // Sign in with Firebase Authentication
+        final credential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
 
-      final uid = credential.user!.uid;
+        final uid = credential.user!.uid;
 
-      // 🔍 Fetch user role from Firestore
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(uid)
-          .get();
+        // Fetch user role & data from Firestore
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
 
-      if (!userDoc.exists) {
+        if (!userDoc.exists) {
+          setState(() {
+            _errorMessage = "No user data found in Firestore.";
+          });
+          return;
+        }
+
+        final role = userDoc.data()?['role'];
+        final name = userDoc.data()?['name'];
+
+        // Redirect based on role
+        if (role == 'Manager') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => ManagerPage(managerName: name),
+            ),
+          );
+        } else if (role == 'Staff') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  StaffPage(staffName: name, staffRole: role),
+            ),
+          );
+        } else if (role == 'Chef') {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const ChefPage()),
+          );
+        } else {
+          setState(() {
+            _errorMessage = "Unknown role: $role";
+          });
+        }
+      } on FirebaseAuthException catch (e) {
+        // Firebase login errors (wrong password, user not found, etc.)
         setState(() {
-          _errorMessage = "No user data found in Firestore.";
+          _errorMessage = "Login failed: ${e.message}";
         });
-        return;
-      }
-
-      final role = userDoc.data()?['role'];
-      final name = userDoc.data()?['name'];
-
-      if (role == 'Manager') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => ManagerPage(managerName: name)),
-        );
-      } else if (role == 'Staff') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => StaffPage(staffName: name, staffRole: role)),
-        );
-      } else if (role == 'Chef') {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const ChefPage()),
-        );
-      } else {
+      } catch (e) {
+        // Any other unexpected error
         setState(() {
-          _errorMessage = "Unknown role: $role";
+          _errorMessage = "Something went wrong. Try again.";
         });
       }
-    } on FirebaseAuthException catch (e) {
-      setState(() {
-        _errorMessage = "Login failed: ${e.message}";
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = "Something went wrong. Try again.";
-      });
     }
   }
-}
 
+  // ------------------ UI BUILD ------------------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background image
+          // Background Image
           Image.asset(
             'assets/images/bg.jpg',
             fit: BoxFit.cover,
           ),
 
-          // Blur filter
+          // Blur overlay for aesthetic effect
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6.0, sigmaY: 6.0),
             child: Container(
@@ -103,13 +114,14 @@ class _ScreenloginState extends State<Screenlogin> {
             ),
           ),
 
-          // Login content
+          // Login Form
           Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(24.0),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  // App title (stylized)
                   Text(
                     "Italiano",
                     style: GoogleFonts.pacifico(
@@ -118,10 +130,14 @@ class _ScreenloginState extends State<Screenlogin> {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
+
                   const SizedBox(height: 32),
+
+                  // Login Card
                   Card(
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16)),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
                     elevation: 8,
                     margin: const EdgeInsets.all(8),
                     child: Padding(
@@ -131,6 +147,7 @@ class _ScreenloginState extends State<Screenlogin> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            // Login title
                             Text(
                               "Login",
                               style: Theme.of(context)
@@ -141,26 +158,33 @@ class _ScreenloginState extends State<Screenlogin> {
                                     color: Colors.black87,
                                   ),
                             ),
+
                             const SizedBox(height: 32),
+
+                            // Email Input
                             TextFormField(
                               controller: _usernameController,
                               decoration: InputDecoration(
                                 labelText: 'Email ID',
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 prefixIcon: const Icon(Icons.person),
                               ),
-                              validator: (value) => value!.isEmpty
-                                  ? 'Please enter username'
-                                  : null,
+                              validator: (value) =>
+                                  value!.isEmpty ? 'Please enter email' : null,
                             ),
+
                             const SizedBox(height: 20),
+
+                            // Password Input
                             TextFormField(
                               controller: _passwordController,
                               decoration: InputDecoration(
                                 labelText: 'Password',
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12)),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
                                 prefixIcon: const Icon(Icons.lock),
                               ),
                               obscureText: true,
@@ -168,12 +192,15 @@ class _ScreenloginState extends State<Screenlogin> {
                                   ? 'Please enter password'
                                   : null,
                             ),
+
                             const SizedBox(height: 30),
+
+                            // Login Button
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 minimumSize: const Size.fromHeight(50),
-                                backgroundColor:
-                                    const Color.fromARGB(255, 164, 208, 245),
+                                backgroundColor: const Color.fromARGB(
+                                    255, 164, 208, 245),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
@@ -182,17 +209,20 @@ class _ScreenloginState extends State<Screenlogin> {
                               child: const Text(
                                 "Login",
                                 style: TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w600),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                             ),
+
+                            // Error Message (if any)
                             if (_errorMessage != null) ...[
                               const SizedBox(height: 16),
                               Text(
                                 _errorMessage!,
                                 style: const TextStyle(color: Colors.red),
                               ),
-                            ]
+                            ],
                           ],
                         ),
                       ),
