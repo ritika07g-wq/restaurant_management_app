@@ -65,8 +65,8 @@ class _MenuPageState extends State<MenuPage> {
   Text(
       'Total Menu Items: ${snapshot.data!.docs.length}',
       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      );,
-        const SizedBox(height: 8),
+      );
+        const SizedBox(height: 8);
       
 
           return ListView.builder(
