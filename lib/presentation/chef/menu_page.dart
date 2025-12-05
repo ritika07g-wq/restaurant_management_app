@@ -17,13 +17,17 @@ class _MenuPageState extends State<MenuPage> {
   // Removed: List<Map<String, dynamic>> menuItems = [...]; // Now fetched from Firestore
 
   // --- Helper to show snack bar messages ---
-  void _showSnackBar(String message) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(message)),
-      );
-    }
+  void _showSnackBar(String message, {bool success = true}) {
+  if (mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: success ? Colors.green[400] : Colors.red[400],
+      ),
+    );
   }
+}
+
 
   // --- Function to toggle item availability in Firestore ---
   void _toggleAvailabilityInFirestore(String docId, bool currentAvailability) async {
@@ -58,6 +62,12 @@ class _MenuPageState extends State<MenuPage> {
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return const Center(child: Text('No menu items found. Please add some in Manager Page.'));
           }
+  Text(
+      'Total Menu Items: ${snapshot.data!.docs.length}',
+      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      );,
+        const SizedBox(height: 8),
+      
 
           return ListView.builder(
             itemCount: snapshot.data!.docs.length,

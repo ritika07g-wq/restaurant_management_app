@@ -27,6 +27,15 @@ class _StaffPageState extends State<StaffPage> {
 
   final TextEditingController _gstController = TextEditingController();
   final TextEditingController _discountController = TextEditingController();
+  
+  @override
+
+  void dispose() {
+  _gstController.dispose();
+  _discountController.dispose();
+  super.dispose();
+  }
+
 
   // Logout
   void _logout() async {
@@ -144,23 +153,31 @@ class _StaffPageState extends State<StaffPage> {
                 final itemData = document.data()! as Map<String, dynamic>;
                 final itemId = document.id;
                 final itemName = itemData['name'] ?? 'Unknown Item';
-                final itemPrice = (itemData['price'] ?? 0.0).toDouble();
+                final rawPrice = itemData['price'];
+                final itemPrice = rawPrice == null ? 0.0 : (rawPrice is int ? rawPrice.toDouble() : (rawPrice as num).toDouble());
+//THIRD CHANGE
 
                 return FilterChip(
                   label: Text('$itemName (\$${itemPrice.toStringAsFixed(2)})'),
                   selected: _selectedItemsWithDetails.containsKey(itemId),
                   onSelected: (bool selected) {
-                    setState(() {
-                      if (selected) {
-                        _selectedItemsWithDetails[itemId] = {
-                          ...itemData,
-                          'quantity': 1
-                        };
-                      } else {
-                        _selectedItemsWithDetails.remove(itemId);
-                      }
-                    });
-                  },
+                  setState(() {
+                  if (selected) {
+                  if (_selectedItemsWithDetails.containsKey(itemId)) {
+                  _selectedItemsWithDetails[itemId]!['quantity'] =
+                  (_selectedItemsWithDetails[itemId]!['quantity'] ?? 1) + 1;
+                 }  else {
+          _selectedItemsWithDetails[itemId] = {
+            ...itemData,
+            'quantity': 1
+            };
+        }
+                } else {
+                _selectedItemsWithDetails.remove(itemId);
+               }
+              });
+              },
+
                 );
               }).toList(),
             );
