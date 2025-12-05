@@ -1,23 +1,34 @@
 pipeline {
     agent any
 
+    environment {
+        IMAGE = "ritikagirish123/flutter_restaurant_app"   // Your DockerHub image name
+    }
+
     stages {
 
-        stage('Clone Repo') {
+        stage('Checkout') {
             steps {
                 git branch: 'main', url: 'https://github.com/ritika07g-wq/restaurant_management_app.git'
             }
         }
 
-        stage('Docker Build') {
+        stage('Build Docker Image') {
             steps {
-                sh 'docker build -t flutter_restaurant_app .'
+                script {
+                    sh 'docker build -t $IMAGE .'
+                }
             }
         }
 
-        stage('Docker Run') {
+        stage('Login & Push to DockerHub') {
             steps {
-                sh 'docker run -d -p 8081:80 flutter_restaurant_app || true'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_creds', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh'''
+                       echo "$PASS" | docker login -u "$USER" --password-stdin
+                       docker push $IMAGE
+                    '''
+                }
             }
         }
     }
